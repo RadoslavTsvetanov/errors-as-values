@@ -1,0 +1,9 @@
+when your provide a req with your own token and your id but a different team you can still kick yourself
+
+
+
+what i did:
+i was bruteforcing if i can kick someone from a different team 
+
+TODO:
+- exclude your id from the list
