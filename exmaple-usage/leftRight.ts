@@ -205,3 +205,47 @@ function PaySalary(username: string) {
 
 PaySalary("john")
 PaySalary("popopo")
+
+
+
+
+
+
+// ----------------------------------------------------------------
+
+
+// examples of how to use Either 
+
+
+
+// imagine having an app where you have a gallery with users and the only way to differenciate between users is to check if the user adminPhoto url is 4 chars long, there is no way you can do this using the type system so here you do this  
+type GalleryAdmin = { adminPhoto: string }
+
+class AdminOrNormalUser extends Either<GalleryAdmin,GalleryAdmin >{
+    constructor(v: GalleryAdmin) {
+        super(v, v, () => {
+            if (v.adminPhoto.length === 5) {
+               return true
+           }
+           return false
+        })
+    }
+}
+
+
+
+
+
+function processUser(user: AdminOrNormalUser) {
+    user.handleLeft(async (v) => {
+        console.log("admin user:", v.adminPhoto)
+    }).then(v => {
+        v.handleRight(async (v) => {
+        console.log("normal user")
+    })
+    })
+}
+
+
+processUser(new AdminOrNormalUser({adminPhoto: "hhhh"}))
+processUser(new AdminOrNormalUser({adminPhoto: "hhh"}))

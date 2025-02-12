@@ -43,11 +43,11 @@ export class LeftRight<LeftType, RightType> implements ILeftRight<LeftType, Righ
 
 
 
-export class Either<L,R> {
+export class Either<L,R> { // for when the type system is not enough toi handle differentiating between two types, see example for more  
     private left: L;
     private right: R;
     private isLeft: Validator<L>
-    constructor(left: L, right: R, isLeft: () => boolean) {
+    constructor(left: L, right: R, isLeft: (v: L | R) => boolean) {
         this.isLeft = isLeft
         this.left = left
         this.right = right
