@@ -1,24 +1,24 @@
-import { ILeftRight, LeftRight } from "./leftRight"
+import { ILeftRight, LeftRight } from "../leftRight";
 export interface Unpackable<T> {
-    unpack: () => T
-    unpack_or_with_diverging_type_from_the_original: <C>(d: () => C) => ILeftRight<T,C>; 
-    unpack_or: (d: () => T) => T
-    unpack_with_default: (d: T) => T
-    expect: (msg: string) => T
+  unpack: () => T;
+  unpack_or_with_diverging_type_from_the_original: <C>(
+    d: () => C
+  ) => ILeftRight<T, C>;
+  unpack_or: (d: () => T) => T;
+  unpack_with_default: (d: T) => T;
+  expect: (msg: string) => T;
 }
 
-
-
 export class CustomUnpackable<T> implements Unpackable<T> {
-  protected value: T ;
-  protected canBeUnpacked: () => boolean
-  private cantUnpackMessage: string = "cant unpack" 
+  protected value: T;
+  protected canBeUnpacked: () => boolean;
+  private cantUnpackMessage: string = "cant unpack";
   public set messageWhenYouCntUnpack(msg: string) {
     this.cantUnpackMessage = msg;
   }
   constructor(v: T, checkIfValueIsValid: (v: T) => boolean) {
     this.value = v;
-    this.canBeUnpacked = () =>  checkIfValueIsValid(this.value) ; 
+    this.canBeUnpacked = () => checkIfValueIsValid(this.value);
   }
 
   // unpack_with_result_instead_of_throwing(): ConcreteResult<T> {
@@ -28,30 +28,28 @@ export class CustomUnpackable<T> implements Unpackable<T> {
   //   return new ConcreteResult<T>(new Optionable(this.value), new Optionable<CustomError>(null))
   // }
 
-  expect(msg: string): T{
+  expect(msg: string): T {
     if (!this.canBeUnpacked()) {
-      throw new Error(msg)
+      throw new Error(msg);
     }
-    return this.value
-  };
+    return this.value;
+  }
   unpack(): T {
-    console.log("this can be unpacked returning ",this.canBeUnpacked())
+    console.log("this can be unpacked returning ", this.canBeUnpacked());
     if (!this.canBeUnpacked()) {
       throw new Error(this.cantUnpackMessage);
     }
     return this.value;
   }
 
-  
-    unpack_or(default_handler: () => T): T {
-        if (!this.canBeUnpacked()) {
+  unpack_or(default_handler: () => T): T {
+    if (!this.canBeUnpacked()) {
       return default_handler();
     }
     return this.value;
   }
 
-  
-    unpack_with_default(d: T): T {
+  unpack_with_default(d: T): T {
     if (!this.canBeUnpacked()) {
       return d;
     }
@@ -61,17 +59,10 @@ export class CustomUnpackable<T> implements Unpackable<T> {
   unpack_or_with_diverging_type_from_the_original<C>(
     d: () => C
   ): ILeftRight<T, C> {
-      if (!this.canBeUnpacked()) {
-          return new LeftRight(
-              <T>(null),
-              d()
-          );
-          
-      }
+    if (!this.canBeUnpacked()) {
+      return new LeftRight(<T>null, d());
+    }
 
-      return new LeftRight(
-              this.value,
-              <C>(null)
-          );
+    return new LeftRight(this.value, <C>null);
   }
-} 
+}

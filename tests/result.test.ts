@@ -17,7 +17,15 @@ describe("Result Class", () => {
   test("should create a Result with an error", () => {
     const error = new CustomError("Something went wrong");
     const result = new Result(new Optionable(null), new Optionable(error));
-    expect(result.unpack).toThrow("Something went wrong");
+    console.log("--------------------------------")
+    let msg = ""
+    try {
+      msg = result.unpack()
+    } catch (e) {
+      msg = e.message
+    }
+    console.log(msg);
+    expect(msg).toBe("Something went wrong");
   });
 
   test("should throw error when both value and error are null", () => {
@@ -39,7 +47,7 @@ describe("Result Class", () => {
       new Optionable(new CustomError("Failure"))
     );
     expect(() => result.expect("Expected a value but got null")).toThrow(
-      CustomError
+      "Expected a value but got null"
     );
   });
 });

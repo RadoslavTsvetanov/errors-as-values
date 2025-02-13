@@ -1,6 +1,6 @@
 import { logger } from "../utils/console";
 import { ILeftRight, LeftRight } from "./leftRight";
-import { CustomUnpackable, Unpackable } from "./unpackable";
+import { CustomUnpackable, Unpackable } from "./unpackable/unpackable";
 
 export type none = null | undefined;
 
@@ -50,7 +50,10 @@ export interface IOptionable<T> extends Unpackable<T> {
 
 export class Optionable<T> extends CustomUnpackable<T> {
   constructor(v: T | none) {
-    super(v as T, (v) => {return (v !== null && v !== undefined)});
+    super(v as T, (v) => {
+      return v !== null && v !== undefined;
+    });
+    this.messageWhenYouCntUnpack = "Option is none"
   }
 
   is_none(): boolean {
