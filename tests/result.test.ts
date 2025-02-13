@@ -1,16 +1,23 @@
 import { Optionable } from "../rust-like-pattern/option";
-import { ConcreteResult, CustomError, Result } from "../rust-like-pattern/result";
+import {
+  ConcreteResult,
+  CustomError,
+  Result,
+} from "../rust-like-pattern/result";
 
 describe("Result Class", () => {
   test("should create a Result with a value", () => {
-    const result = new Result(new Optionable(42), new Optionable<CustomError>(null));
-    expect(result.unpack()).toBe(42)
+    const result = new Result(
+      new Optionable(42),
+      new Optionable<CustomError>(null)
+    );
+    expect(result.unpack()).toBe(42);
   });
 
   test("should create a Result with an error", () => {
     const error = new CustomError("Something went wrong");
     const result = new Result(new Optionable(null), new Optionable(error));
-    expect(result.unpack()).toThrow("Something went wrong")
+    expect(result.unpack).toThrow("Something went wrong");
   });
 
   test("should throw error when both value and error are null", () => {

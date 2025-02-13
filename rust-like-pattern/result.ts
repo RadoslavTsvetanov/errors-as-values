@@ -22,7 +22,7 @@ export class Result<T, E extends ICustomError> extends CustomUnpackable<T> imple
 
     constructor(value: Optionable<T>/* T | null */, error: Optionable<E>/*E | null*/) {
         super(value.unpack_with_default(null as T), (e) => {
-            return !(this.error.is_none())
+            return (error.is_none())
         })
         if (value.is_none() && error.is_none()) {
             throw new Error("Either value or error must be provided");
@@ -48,27 +48,6 @@ static async  transformFunctionThatThrowsIntoResult<ExpectedResponseType>(
     }
 }
 
-    expect(msg: string) {
-        if (this.value === null) {
-            throw new CustomError(msg)
-        }
-    }
-
-    override unpack(): T {
-        if (!this.couldUnpack()) {
-            throw new Error(this.error.unpack().message)
-        }
-        return this.value
-    }
-
-    override unpack_with_result_instead_of_throwing(): ConcreteResult<T> {
-        if (!this.couldUnpack()) {
-
-            return new ConcreteResult<T>(new Optionable<T>(null),new Optionable(new CustomError("unpack resulted in error"+ this.error.unpack().message )))
-        }
-
-    return new ConcreteResult<T>(new Optionable(this.value), new Optionable<CustomError>(null))
-    }
 } 
 
 export class ConcreteResult<T> extends Result<T, ICustomError>{}
