@@ -1,4 +1,4 @@
-import { ILeftRight, LeftRight } from "../leftRight";
+import { type ILeftRight, LeftRight } from "../leftRight";
 export interface Unpackable<T> {
   unpack: () => T;
   unpack_or_with_diverging_type_from_the_original: <C>(
@@ -7,6 +7,7 @@ export interface Unpackable<T> {
   unpack_or: (d: () => T) => T;
   unpack_with_default: (d: T) => T;
   expect: (msg: string) => T;
+  ifCanBeUnpacked: (handler: (v: T) => void) => void
 }
 
 export class CustomUnpackable<T> implements Unpackable<T> {
@@ -16,9 +17,9 @@ export class CustomUnpackable<T> implements Unpackable<T> {
   public set messageWhenYouCntUnpack(msg: string) {
     this.cantUnpackMessage = msg;
   }
-  constructor(v: T, checkIfValueIsValid: (v: T) => boolean) {
+  constructor(v: T, isValueValid: (v: T) => boolean) {
     this.value = v;
-    this.canBeUnpacked = () => checkIfValueIsValid(this.value);
+    this.canBeUnpacked = () => isValueValid(this.value);
   }
 
   // unpack_with_result_instead_of_throwing(): ConcreteResult<T> {
@@ -27,6 +28,11 @@ export class CustomUnpackable<T> implements Unpackable<T> {
   //   }
   //   return new ConcreteResult<T>(new Optionable(this.value), new Optionable<CustomError>(null))
   // }
+  ifCanBeUnpacked(handler: (v: T) => void): void {
+    if (this.canBeUnpacked()) {
+     handler(this.value);
+   }
+  } 
 
   expect(msg: string): T {
     if (!this.canBeUnpacked()) {

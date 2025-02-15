@@ -2,9 +2,11 @@ import { LeftRight } from "./leftRight";
 import { IOptionable, Optionable } from "./option";
 import { CustomUnpackable, Unpackable } from "./unpackable/unpackable";
 
-interface ICustomError {
+export interface ICustomError {
   message: string;
 }
+
+type Errors = Record<string, Optionable<ICustomError>>
 
 export class CustomError implements ICustomError {
   message: string;
@@ -13,49 +15,84 @@ export class CustomError implements ICustomError {
   }
 }
 
-interface IResult<T, E extends ICustomError> {
+interface IResult<T, E extends Errors> {
   expect(msg: string): void;
 }
 
-export class Result<T, E extends ICustomError>
+
+
+export class Result<T, E extends Errors>
   extends CustomUnpackable<T>
   implements IResult<T, E>
 {
-  private error: Optionable<E> = new Optionable<E>(null);
+  private error: Optionable<E>;
 
-  constructor(
-    value: Optionable<T> /* T | null */,
-    error: Optionable<E> /*E | null*/
-  ) {
-    super(value.unpack_with_default(null as T), (e) => {
-      return error.is_none();
-    });
-    if (value.is_none() && error.is_none()) {
+  constructor(value: Optionable<T>, error: Optionable<E>) {
+    super(value.unpack_with_default(null as T), (e) => error.is_none());
+    this.error = error;
+    if (value.is_none() && !error) {
       throw new Error("Either value or error must be provided");
     }
-    if (!value.is_none() && !error.is_none()) {
-      throw new Error("Only value or error can be provided not both");
+    if (!value.is_none() && error) {
+      throw new Error("Only value or error can be provided, not both");
     }
 
-    this.messageWhenYouCntUnpack = error.unpack_with_default((new CustomError("cant unpack (default message for any result )"))).message
+
+      error.ifCanBeUnpacked((definedError) => {
+      Object.entries(definedError).forEach(([key, value]) => {
+        console.log(key, value);
+        value.ifCanBeUnpacked((v) => {
+          value.ifCanBeUnpacked(
+            (v) => this.messageWhenYouCntUnpack = v.message
+          );
+        })
+      });
+
+      })
+  }
+  
+  public getError(): Optionable<E>{
+    return this.error;  
   }
 
   static async transformFunctionThatThrowsIntoResult<ExpectedResponseType>(
     functionThatCouldThrow: () => Promise<ExpectedResponseType>
-  ): Promise<Result<ExpectedResponseType, CustomError>> {
+  ): Promise<Result<ExpectedResponseType, Errors>> {
     try {
-      return new Result<ExpectedResponseType, CustomError>(
+      return new Result(
         new Optionable<ExpectedResponseType>(await functionThatCouldThrow()),
-        new Optionable<CustomError>(null)
+        (null)
       );
     } catch (err) {
-      return new Result<ExpectedResponseType, CustomError>(
+      return new Result(
         new Optionable<ExpectedResponseType>(null),
-        new Optionable(new CustomError(err.message))
-      );
+        (
+          { errorThrownFromFunction: new Optionable(new CustomError(err.message)) }
+        )) 
     }
   }
+
+handlerErrors(handlers: Record<keyof E, (e: ICustomError) => void>): void {
+  this.error.ifCanBeUnpacked((v) => {
+    Object.keys(v).forEach((key) => {
+      const handler = handlers[key as keyof E]; // Ensure correct typing
+      if (handler) {
+        v[key].ifCanBeUnpacked((error) => handler(error))
+      }
+    });
+  });
 }
 
-export class ConcreteResult<T> extends Result<T, ICustomError> {}
+}
 
+export class ConcreteResult<T> extends Result<T, Errors> {}
+
+
+
+
+
+
+
+
+
+// ---------------------
