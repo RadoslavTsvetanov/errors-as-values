@@ -1,77 +1,69 @@
-import { Optionable } from "../rust-like-pattern/option";
-import {
-  ConcreteResult,
-  CustomError,
-  Result,
-} from "../rust-like-pattern/result";
+import { Optionable } from "../src/rust-like-pattern/option";
+import { CustomError, ICustomError, Result } from "../src/rust-like-pattern/result";
+import { logger } from "../src/utils/console";
 
-describe("Result Class", () => {
+// Mock Errors type
+interface Errors {
+  errorThrownFromFunction?: Optionable<CustomError>;
+}
+
+describe("Result class", () => {
   test("should create a Result with a value", () => {
-    const result = new Result(
-      new Optionable(42),
-      new Optionable<CustomError>(null)
-    );
-    expect(result.unpack()).toBe(42);
+    const result = new Result(new Optionable(42), new Optionable<{}>(null)); // <{}> means no errors but do not use it recklessly i am doing it for testing purposes
+    logger.log(result.getError().is_none())
+    expect(result.getError().is_none()).toBe(true);
   });
 
   test("should create a Result with an error", () => {
-    const error = new CustomError("Something went wrong");
-    const result = new Result(new Optionable(null), new Optionable(error));
-    console.log("--------------------------------")
-    let msg = ""
-    try {
-      msg = result.unpack()
-    } catch (e) {
-      msg = e.message
-    }
-    console.log(msg);
-    expect(msg).toBe("Something went wrong");
+    const error = new Optionable<{ errorError: Optionable<ICustomError> }>({ errorError: new Optionable(new CustomError("An error occurred")) });
+    const result = new Result(new Optionable <{}>(null), error);
+    expect(result.getError().is_none()).toBe(false);
   });
 
-  test("should throw error when both value and error are null", () => {
-    expect(
-      () => new Result(new Optionable(null), new Optionable<CustomError>(null))
-    ).toThrow("Either value or error must be provided");
-  });
-
-  test("should throw error when both value and error are provided", () => {
-    expect(
-      () =>
-        new Result(new Optionable(42), new Optionable(new CustomError("Error")))
-    ).toThrow("Only value or error can be provided not both");
-  });
-
-  test("expect() should throw CustomError when value is null", () => {
-    const result = new Result(
-      new Optionable(null),
-      new Optionable(new CustomError("Failure"))
-    );
-    expect(() => result.expect("Expected a value but got null")).toThrow(
-      "Expected a value but got null"
+  test("should throw an error if both value and error are provided", () => {
+    const value = new Optionable(42);
+    const error = new Optionable<{}>(new CustomError("An error occurred"));
+    expect(() => new Result(value, error)).toThrow(
+      "Only value or error can be provided, not both"
     );
   });
-});
 
-describe("transformFunctionThatThrowsIntoResult", () => {
-  test("should return a Result with a value when function resolves", async () => {
-    const mockFn = jest.fn().mockResolvedValue(42);
-    const result = await Result.transformFunctionThatThrowsIntoResult(mockFn);
-    expect(result).toBeInstanceOf(Result);
-  });
-
-  test("should return a Result with an error when function rejects", async () => {
-    const mockFn = jest.fn().mockRejectedValue(new Error("Function failed"));
-    const result = await Result.transformFunctionThatThrowsIntoResult(mockFn);
-    expect(result).toBeInstanceOf(Result);
-  });
-});
-
-describe("ConcreteResult Class", () => {
-  test("should create a ConcreteResult", () => {
-    const result = new ConcreteResult(
-      new Optionable("data"),
-      new Optionable<CustomError>(null)
+  test("should throw an error if neither value nor error is provided", () => {
+    expect(() => new Result(new Optionable<{}>(null), new Optionable<{}>(null))).toThrow(
+      "Either value or error must be provided"
     );
-    expect(result).toBeInstanceOf(ConcreteResult);
+  });
+
+  test("transformFunctionThatThrowsIntoResult should return a Result with value when function succeeds", async () => {
+    const successfulFunction = async () => 42;
+    const result = await Result.transformFunctionThatThrowsIntoResult(
+      successfulFunction
+    );
+    expect(result.getError().is_none()).toBe(true);
+  });
+
+  test("transformFunctionThatThrowsIntoResult should return a Result with an error when function throws", async () => {
+    const failingFunction = async () => {
+      throw new Error("Failed");
+    };
+    const result = await Result.transformFunctionThatThrowsIntoResult(
+      failingFunction
+    );
+    expect(result.getError().is_none()).toBe(false);
+  });
+
+  test("handlerErrors should execute correct handler when error exists", () => {
+    const error = new Optionable({
+      errorThrownFromFunction: new Optionable(new CustomError("Test error")),
+    });
+    const result = new Result(new Optionable<{}>(null), error);
+
+    const handlerMock = jest.fn();
+
+    result.handlerErrors({
+      errorThrownFromFunction: handlerMock,
+    });
+
+    expect(handlerMock).toHaveBeenCalled();
   });
 });

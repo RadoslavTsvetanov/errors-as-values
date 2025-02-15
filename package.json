@@ -1,0 +1,13 @@
+{
+  "name": "x-ae-x",
+  "module": "index.ts",
+  "main": "lib/index.js",
+  "type": "module",
+  "types": "lib",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

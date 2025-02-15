@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { LeftRight } from "../rust-like-pattern/leftRight";
+import { LeftRight } from "../src/rust-like-pattern/leftRight";
 
 
 describe("LeftRight", () => {

@@ -1,6 +1,6 @@
-import { logger } from './../utils/console';
-import { LeftRight } from "../rust-like-pattern/leftRight";
-import { Optionable } from "../rust-like-pattern/option";
+import { logger } from './../src/utils/console';
+import { LeftRight } from "../src/rust-like-pattern/leftRight";
+import { Optionable, statics } from "../src/rust-like-pattern/option";
 
 describe("Optionable", () => {
   test("unpack should return the value if it's not null or undefined", () => {
@@ -10,7 +10,7 @@ describe("Optionable", () => {
 
   test("unpack should throw an error if the value is null", () => {
     const opt = new Optionable(null);
-    expect(() => opt.unpack()).toThrow("Option is None");
+    expect(() => opt.unpack()).toThrow(statics.messageForWhenOptionIsNone);
   });
 
   test("unpack should throw an error if the value is undefined", () => {

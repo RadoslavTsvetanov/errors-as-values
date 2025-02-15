@@ -41,7 +41,6 @@ export class CustomUnpackable<T> implements Unpackable<T> {
     return this.value;
   }
   unpack(): T {
-    console.log("this can be unpacked returning ", this.canBeUnpacked());
     if (!this.canBeUnpacked()) {
       throw new Error(this.cantUnpackMessage);
     }

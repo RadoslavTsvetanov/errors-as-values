@@ -12,10 +12,10 @@ function getAdmin(username: string): LeftRightWithMemory<{isAdmin: boolean}, {ke
 
 async function validateUser(username: string) {
     const res =await  getAdmin(username).handleLeft(async (v) => {
-        console.log("admin logged in ")
+        // ... 
     })
     res.handleRight(async (v) => { 
-        console.log("regular user logged in") // if the user  is indeed admin this will never run 
+        // ...
     })
 }
 
@@ -195,9 +195,9 @@ function getUser(username: string): ClassicalEither<Senior, Junior> {
 function PaySalary(username: string) {
     const user = getUser(username)
     user.handleLeft(async (v) => {
-        console.log("paying salary of",(v.base_salary * 2.5 * v.years_in_the_company).toString())
+        // console.log("paying salary of",(v.base_salary * 2.5 * v.years_in_the_company).toString())
     }).handleRight(async (v) => {
-        console.log("paying salary of",(v.base_salary * 1.5))
+        // console.log("paying salary of",(v.base_salary * 1.5))
     })
 
 }
@@ -238,10 +238,10 @@ class AdminOrNormalUser extends Either<GalleryAdmin,GalleryAdmin >{
 
 function processUser(user: AdminOrNormalUser) {
     user.handleLeft(async (v) => {
-        console.log("admin user:", v.adminPhoto)
+        // console.log("admin user:", v.adminPhoto)
     }).then(v => {
         v.handleRight(async (v) => {
-        console.log("normal user")
+        // console.log("normal user")
     })
     })
 }

@@ -48,12 +48,18 @@ export interface IOptionable<T> extends Unpackable<T> {
 
 //Plan -> write tests for this and then remake it to inherit since currently it will easier to test it whether it behaves cirrectly and if not debugging will be easier
 
+
+export const statics = {
+  messageForWhenOptionIsNone: "Option is None "
+}
+
+
 export class Optionable<T> extends CustomUnpackable<T> {
   constructor(v: T | none) {
     super(v as T, (v) => {
       return v !== null && v !== undefined;
     });
-    this.messageWhenYouCntUnpack = "Option is none"
+    this.messageWhenYouCntUnpack = statics.messageForWhenOptionIsNone 
   }
 
   is_none(): boolean {
