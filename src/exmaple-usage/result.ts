@@ -32,15 +32,15 @@ where is the problem here? -> well the compiler does not warn us that something 
 */
 
 import { Optionable } from "../rust-like-pattern/option"
-import { ConcreteResult, CustomError, Result } from "../rust-like-pattern/result"
+import { ConcreteResult, CustomError, Result, type ICustomError } from "../rust-like-pattern/result"
 
 
-function validateInput(v: string): ConcreteResult<string> {
+function validateInput(v: string): Result<string, {inputTooSmall: Optionable<ICustomError>}> {
     if (v.length === 0) {
-        return new ConcreteResult<string>(new Optionable<string>(null),new Optionable(new CustomError("length cant be zero")))
+        return new Result(new Optionable<string>(null), new Optionable({ inputTooSmall: new Optionable(new CustomError("length cant be zero")) }))
     }
 
-    return new ConcreteResult(new Optionable(v), new Optionable<CustomError>(null))
+    return new Result(new Optionable(v), new Optionable<{inputTooSmall: Optionable<ICustomError>}>(null))
 }
 
 () => {

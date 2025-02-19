@@ -1,5 +1,5 @@
 import { ClassicalEither, Either, LeftInstance, LeftRight, LeftRightWithMemory, RightInstance } from "../rust-like-pattern/leftRight";
-import { Validator } from "../utils/validator";
+import type { Validator } from "../utils/validator";
 
 function getAdmin(username: string): LeftRightWithMemory<{isAdmin: boolean}, {key: string}> {
     if (username.length === 3) {

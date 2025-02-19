@@ -1,5 +1,4 @@
-import { Validator } from "../utils/validator"
-import { IOptionable, Optionable } from "./option"
+import type { Validator } from "../utils/validator"
 
 export interface ILeftRight<LeftType, RightType>{
     handleLeft<HandleLeftReturnType>(handler: (v: LeftType) => Promise<HandleLeftReturnType>): Promise<this>
@@ -72,7 +71,7 @@ export class Either<L,R> { // for when the type system is not enough toi handle 
 
 
 
-export class LeftRightWithMemory<Left, Right> implements LeftRight<Left, Right> { 
+export class LeftRightWithMemory<Left, Right> implements ILeftRight<Left, Right> { 
     private left: Left;
     private right: Right;
     private didParentSucceed: boolean = false;
@@ -111,11 +110,15 @@ export class LeftRightWithMemory<Left, Right> implements LeftRight<Left, Right> 
     }
 
     handleLeftWhichReturnsTheResultedValue<ReturnType>(handler: (v: Left) => Promise<ReturnType>): Promise<ReturnType> {
-        
+        return handler(this.left)
     }
 
     handleRightWhichReturnsTheResultedValue<ReturnType>(handler: (v: Right) => Promise<ReturnType>): Promise<ReturnType> {
-        
+       return handler(this.right) 
+    }
+
+    async getRaw(): Promise<[Left, Right]> {
+        return [this.left, this.right]
     }
 }
 
@@ -155,6 +158,7 @@ export class ClassicalEither<Left, Right>{
     private isLeft: boolean;
     constructor(v: LeftInstance<Left> | RightInstance<Right>) {
        this.isLeft = v.getTag() === "left"
+       this.value = v.v
     }
 
     handleLeft(handler: (v: Left) => void): this {

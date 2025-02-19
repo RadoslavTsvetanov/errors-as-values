@@ -1,6 +1,6 @@
 import { LeftRight } from "./leftRight";
-import { IOptionable, Optionable } from "./option";
-import { CustomUnpackable, Unpackable } from "./unpackable/unpackable";
+import { type IOptionable, Optionable } from "./option";
+import { CustomUnpackable, type Unpackable } from "./unpackable/unpackable";
 
 export interface ICustomError {
   message: string;
@@ -62,6 +62,15 @@ export class Result<T, E extends Errors>
     return this.error;  
   }
 
+  public Ok<T, E extends Errors>(v: T): Result<T, E>{
+    return new Result<T, E>(new Optionable(v), new Optionable < E >(null))
+  }
+
+  public static NotOk<T, E extends Errors>(e: E): Result<T, E>{
+    return new Result<T, E>(new Optionable<T>(null), new Optionable(e))
+  }
+
+
   static async transformFunctionThatThrowsIntoResult<ExpectedResponseType>(
     functionThatCouldThrow: () => Promise<ExpectedResponseType>
   ) : Promise<Result<ExpectedResponseType, {errorThrownFromTheFunction: Optionable<ICustomError> }>> {
@@ -70,7 +79,7 @@ export class Result<T, E extends Errors>
         new Optionable<ExpectedResponseType>(await functionThatCouldThrow()),
         (new Optionable<{ errorThrownFromTheFunction : Optionable<ICustomError>}>(null))
       );
-    } catch (err) {
+    } catch (err: any) {
       return new Result(
         new Optionable<ExpectedResponseType>(null),
         new Optionable(
